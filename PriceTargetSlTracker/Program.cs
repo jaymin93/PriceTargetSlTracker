@@ -8,7 +8,11 @@ namespace PriceTargetSlTracker
     {
         static async Task Main(string[] args)
         {
-            List<BTST> btsts = new List<BTST>() { new BTST() { symbol = "RUSHIL", buyprice = 380,isActive = true,SL= 309,Tgt1=312,Tgt2=315,Tgt3=320,Tgt4=325, Tgt5=330,Tgt6= 340 }, new BTST() { symbol = "DLINKINDIA", buyprice = 330, isActive = true, SL = 300, Tgt1 = 349, Tgt2 = 350, Tgt3 = 360, Tgt4 = 375, Tgt5 = 380, Tgt6 = 390 } };
+            List<BTST> btsts = new List<BTST>()
+            { 
+                new BTST() { symbol = "RUSHIL", buyprice = 380,isActive = true,SL= 309,Tgt1=312,Tgt2=315,Tgt3=320,Tgt4=325, Tgt5=330,Tgt6= 340 },
+                new BTST() { symbol = "DLINKINDIA", buyprice = 330, isActive = true, SL = 300, Tgt1 = 349, Tgt2 = 350, Tgt3 = 360, Tgt4 = 375, Tgt5 = 380, Tgt6 = 390 } 
+            };
 
             while (true)
             {
@@ -24,7 +28,6 @@ namespace PriceTargetSlTracker
                     IsTaregtHit(item, item.Tgt5, 5);
                     IsTaregtHit(item, item.Tgt6, 6);
                 }
-                await Task.Delay(200);
             }
         }
 
