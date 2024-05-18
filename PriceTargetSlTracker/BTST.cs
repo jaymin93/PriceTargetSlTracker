@@ -12,12 +12,7 @@ namespace PriceTargetSlTracker
         public decimal cmp { get; set; }
         public decimal buyprice { get; set; }
         public decimal SL { get; set; }
-        public decimal Tgt1 { get; set; }
-        public decimal Tgt2 { get; set; }
-        public decimal Tgt3 { get; set; }
-        public decimal Tgt4 { get; set; }
-        public decimal Tgt5 { get; set; }
-        public decimal Tgt6 { get; set; }
+        public List<decimal> TargetList { get; set; }
         public bool isActive { get; set; }
     }
 }

@@ -9,24 +9,22 @@ namespace PriceTargetSlTracker
         static async Task Main(string[] args)
         {
             List<BTST> btsts = new List<BTST>()
-            { 
-                new BTST() { symbol = "RUSHIL", buyprice = 380,isActive = true,SL= 309,Tgt1=312,Tgt2=315,Tgt3=320,Tgt4=325, Tgt5=330,Tgt6= 340 },
-                new BTST() { symbol = "DLINKINDIA", buyprice = 330, isActive = true, SL = 300, Tgt1 = 349, Tgt2 = 350, Tgt3 = 360, Tgt4 = 375, Tgt5 = 380, Tgt6 = 390 } 
+            {
+                new BTST() { symbol = "RUSHIL", buyprice = 318,isActive = true,SL= 309,TargetList = new List<decimal>(){312,315,320,325,330,340 } },
+                //new BTST() { symbol = "RUSHIL", buyprice = 380,isActive = true,SL= 309,TargetList = new List<decimal>(){312,315,320,325,330,340 } }
+
             };
 
             while (true)
             {
                 foreach (var item in btsts)
                 {
-                    var cmpOfSymbol =await GetCurrentRateofStock(item.symbol);
+                    var cmpOfSymbol = await GetCurrentRateofStock(item.symbol);
                     item.cmp = cmpOfSymbol;
                     ISSLHitOrNearBy(item);
-                    IsTaregtHit(item, item.Tgt1, 1);
-                    IsTaregtHit(item, item.Tgt2, 2);
-                    IsTaregtHit(item, item.Tgt3, 3);
-                    IsTaregtHit(item, item.Tgt4, 4);
-                    IsTaregtHit(item, item.Tgt5, 5);
-                    IsTaregtHit(item, item.Tgt6, 6);
+                    var nearByTargetValue = FindNearestTagrgetValue(item.TargetList, cmpOfSymbol);
+                    IsTaregtHit(item,cmpOfSymbol, nearByTargetValue);
+                    Console.WriteLine($"price of {item.symbol} has changed {CalculatePercentageChange(item.buyprice, cmpOfSymbol)} ") ;
                 }
             }
         }
@@ -37,22 +35,24 @@ namespace PriceTargetSlTracker
 
             if (btst.cmp - btst.SL <= 5)
             {
-                WriteToConsole($"{btst.symbol} is near by to SL Or SL Is already hit please look at it and take action",ConsoleColor.Red);
-            return true;
+                WriteToConsole($"{btst.symbol} is near by to SL Or SL Is already hit please look at it and take action", ConsoleColor.Red);
+                return true;
             }
             else
             {
-                
+
                 return false;
             }
         }
-        
+
         public static async Task<decimal> GetCurrentRateofStock(string symbol)
         {
             try
             {
+# if DEBUG
                 Stopwatch sw = new();
                 sw.Start();
+#endif
                 string url = $"https://www.google.com/finance/quote/{symbol}:NSE?hl=en";
 
                 using (HttpClient client = new())
@@ -66,8 +66,10 @@ namespace PriceTargetSlTracker
 
                     if (decimal.TryParse(priceText, out decimal price))
                     {
+#if DEBUG
                         sw.Stop();
                         Console.WriteLine($"{Environment.NewLine}current price for {symbol} is {price} time took {sw.ElapsedMilliseconds} seconds {Environment.NewLine}");
+#endif
                         return price;
                     }
                     else
@@ -88,19 +90,44 @@ namespace PriceTargetSlTracker
             Console.ForegroundColor = consoleColor;
             Console.WriteLine($"{Environment.NewLine}{TextToWrite}{Environment.NewLine}");
             Console.ResetColor();
-            if (consoleColor ==  ConsoleColor.Red)
+            if (consoleColor == ConsoleColor.Red)
             {
                 Console.Beep();
             }
         }
 
-        public static void IsTaregtHit(BTST btst, decimal targertToCompare,int targerNum)
+        public static void IsTaregtHit(BTST bTST, decimal cmp,decimal NearByTarget)
         {
-            if (targertToCompare!= default && targertToCompare - btst.cmp <= 5)
-            {
-                WriteToConsole($"{btst.symbol} is near by to Target {targerNum}", ConsoleColor.Green);
-            }
+                if (NearByTarget - cmp <= 5)
+                {
+                    WriteToConsole($"{bTST.symbol} is near by to Target {NearByTarget}", ConsoleColor.Green);
+                }
         }
-   
+
+        static decimal FindNearestTagrgetValue(List<decimal> values, decimal cmp)
+        {
+            decimal nearestValue = values[0];
+            decimal smallestDifference = Math.Abs(cmp - nearestValue);
+
+            foreach (decimal value in values)
+            {
+                decimal difference = Math.Abs(cmp - value);
+
+                if (difference < smallestDifference)
+                {
+                    smallestDifference = difference;
+                    nearestValue = value;
+                }
+            }
+
+            return nearestValue;
+        }
+
+        static decimal CalculatePercentageChange(decimal oldValue, decimal newValue)
+        {
+            decimal changePercentage = ((newValue - oldValue) / oldValue) * 100;
+            return changePercentage;
+        }
+
     }
 }
